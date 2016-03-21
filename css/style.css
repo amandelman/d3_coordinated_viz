@@ -1,0 +1,41 @@
+/* 575 boilerplate style.css */
+
+
+.container {
+    background-color: lightgray;
+}
+
+.rectangle {
+    fill: white;
+    x: 60;
+    y: 50;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    stroke-width: 1.5px;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: cursive;
+    font-size: 0.7em;
+}
+
+.title {
+    font-family: cursive;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.nameLine {
+    font-family: cursive;
+    font-size: 1em;
+}
+
+.popLine {
+    font-family: cursive;
+    font-size: 0.8em;
+}
