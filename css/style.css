@@ -1,41 +1,21 @@
 /* 575 boilerplate style.css */
 
-
-.container {
-    background-color: lightgray;
-}
-
-.rectangle {
-    fill: white;
-    x: 60;
-    y: 50;
-}
-
-.axis path,
-.axis line {
-    fill: none;
-    stroke: black;
+.states {
+    fill: #FFF;
+    stroke: #CCC;
     stroke-width: 1.5px;
-    shape-rendering: crispEdges;
 }
 
-.axis text {
-    font-family: cursive;
-    font-size: 0.7em;
+.map {
+    border: medium solid #999;
 }
 
-.title {
-    font-family: cursive;
-    font-size: 1.8em;
-    font-weight: bold;
+.gratLines {
+    fill: none;
+    stroke: #999;
+    stroke-width: 1px;
 }
 
-.nameLine {
-    font-family: cursive;
-    font-size: 1em;
-}
-
-.popLine {
-    font-family: cursive;
-    font-size: 0.8em;
+.gratBackground {
+    fill: rgba(101, 187, 250, 0.81);
 }
