@@ -5,7 +5,7 @@
     
     //pseudo global variables
     var attArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013"]; //list of attributes to be expressed
-    var expressed = attArray[0]; //initial attribute
+    var expressed = attArray[4]; //initial attribute
 
     //execute script when window is loaded
     window.onload = setMap();
@@ -42,9 +42,9 @@
             .defer(d3.json, "data/surrounding_states.topojson") //load surrounding states data
             .defer(d3.json, "data/louisiana_parishes.topojson") //load choropleth spatial data
             .await(callback);
-
-        function callback(error, csvData, background, louisiana){
-            
+        
+        //callback function to use data once loaded
+        function callback(error, csvData, background, louisiana){    
             //place graticule
             setGraticule(map, path);
             
@@ -61,12 +61,76 @@
             //join CSV data to GeoJSON enumeration unites
             louisianaParishes = joinData(louisianaParishes, csvData);
             
-            //add enumeration unites to the map
-            setEnumerationUnits(louisianaParishes, map, path);
+            //create the color scale
+            var colorScale = makeColorScale(csvData);
             
+            //add enumeration units to the map
+            setEnumerationUnits(louisianaParishes, map, path, colorScale);
         };
+        
+    }; //end of setMap()
+    
+    //function to create color scale generator
+    function makeColorScale(data){
+        var colorClasses = [
+            '#f7f4f9',
+            '#e7e1ef',
+            '#d4b9da',
+            '#c994c7',
+            '#df65b0',
+            '#e7298a',
+            '#ce1256',
+            '#91003f'
+        ];
+    
+        
+        //create color scale generator
+    var colorScale = d3.scale.quantile()
+        .range(colorClasses);
+
+    //build array of all values of the expressed attribute for a quantile scale
+    var domainArray = [];
+    for (var i=0; i<data.length; i++){
+        var val = parseFloat(data[i][expressed]);
+        domainArray.push(val);
     };
-            
+
+    //assign array of expressed values as scale domain
+    colorScale.domain(domainArray);
+        
+//        //create natural breaks color scale generator
+//        var colorScale = d3.scale.threshold()
+//            .range(colorClasses);
+//        
+//        //build array of all values of the expressed attribute
+//        var domainArray = []
+//        for (var i = 0; i<data.length; i++){
+//            var val = parseFloat(data[i][expressed]);
+//            domainArray.push(val);
+//        };
+//        
+//        //cluster data using simple statistics clustering algorithm
+//        var clusters = ss.ckmeans(domainArray, 5);
+//        
+//        console.log(clusters); 
+//        
+//        //reset domain array to cluster minima
+//        domainArray = clusters.map(function(d){
+//            return d3.min(d);
+//        });
+//        
+//        //remove first value from domain array to create class breakpoints
+//        domainArray.shift();
+//        
+//        //assign array of last 7 cluster minimums as domain
+//        colorScale.domain(domainArray);
+        
+        return colorScale;
+        
+    };
+    
+    
+    //function to create graticule
     function setGraticule(map, path){
         //create graticule generator
         var graticule = d3.geo.graticule()
@@ -86,7 +150,8 @@
             .attr("class", "gratLines") //assign class for styling
             .attr("d", path); //project graticule lines
     };
-        
+    
+    //function to join CSV data to spatial data
     function joinData(louisianaParishes, csvData){
         //loop through the CSV to assign each set of CSV attribute values to geoJSON parish
         for (var i=0; i<csvData.length; i++){
@@ -112,8 +177,9 @@
         
         return louisianaParishes;
     };
-
-    function setEnumerationUnits(louisianaParishes, map, path){
+    
+    //function to draw enumeration units
+    function setEnumerationUnits(louisianaParishes, map, path,  colorScale){
         //add Louisiana parishes to the map
         var parishes = map.selectAll(".regions")
             .data(louisianaParishes)
@@ -122,12 +188,10 @@
             .attr("class", function(d){
                 return "parishes " + d.properties.GEOID;
             })
-            .attr("d", path);
-        console.log(louisianaParishes);
+            .attr("d", path)
+            .style("fill", function(d){
+                return colorScale(d.properties[expressed]);
+            });
     };     
-    
-    
-           
-            
 
 })();
