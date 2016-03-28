@@ -1,22 +1,36 @@
 /* 575 boilerplate style.css */
 
 .states {
-    fill: #FFF;
-    stroke: #CCC;
+    fill: rgb(242, 242, 242);
+    stroke: #d6d6d6;
     stroke-width: 1.5px;
 }
 
 .map {
     border: medium solid #999;
+    margin: 10px 0 0 20px;
+}
+
+.chart {
+    background-color: rgb(242, 242, 242);
+    border: medium solid #999;
+    float: right;
+    margin: 10px 20px 0 0;
 }
 
 .gratLines {
     fill: none;
-    stroke: #999;
+    stroke: #d6d6d6;
     stroke-width: 1px;
 }
 
 .gratBackground {
-    fill: rgba(101, 187, 250, 0.81);
+    fill: rgb(131, 203, 255);
 }
 
+
+.parishes {
+    stroke: rgba(0, 0, 0, 0.7);
+    stroke-width: 0.2px;
+    stroke-linecap: round;
+}

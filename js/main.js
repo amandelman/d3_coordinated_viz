@@ -5,7 +5,7 @@
     
     //pseudo global variables
     var attArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013"]; //list of attributes to be expressed
-    var expressed = attArray[4]; //initial attribute
+    var expressed = attArray[0]; //initial attribute
 
     //execute script when window is loaded
     window.onload = setMap();
@@ -14,7 +14,7 @@
     function setMap(){
 
         //map frame dimensions
-        var width = 800,
+        var width = window.innerWidth*0.5,
             height = 700;
 
         //svg container for map
@@ -27,9 +27,9 @@
         //Albers equal area projection centered on Louisiana
         var projection = d3.geo.albers()
             .center([0, 31])
-            .rotate([91.8, 0 , 0])
+            .rotate([91.5, 0 , 0])
             .parallels([28, 34])
-            .scale(8600)
+            .scale(8400)
             .translate([width/2, height/2]);
 
         var path = d3.geo.path()
@@ -66,69 +66,59 @@
             
             //add enumeration units to the map
             setEnumerationUnits(louisianaParishes, map, path, colorScale);
+            
+            //add coordinated visualization to the map
+            setChart(csvData, colorScale);
         };
-        
     }; //end of setMap()
     
     //function to create color scale generator
     function makeColorScale(data){
-        var colorClasses = [
-            '#f7f4f9',
-            '#e7e1ef',
-            '#d4b9da',
-            '#c994c7',
-            '#df65b0',
-            '#e7298a',
-            '#ce1256',
-            '#91003f'
-        ];
+        var colorClasses = ['#f7f4f9','#e7e1ef','#d4b9da','#c994c7','#df65b0','#e7298a','#ce1256','#980043','#67001f'];
     
-        
         //create color scale generator
-    var colorScale = d3.scale.quantile()
-        .range(colorClasses);
+        var colorScale = d3.scale.quantile()
+            .range(colorClasses);
 
-    //build array of all values of the expressed attribute for a quantile scale
-    var domainArray = [];
-    for (var i=0; i<data.length; i++){
-        var val = parseFloat(data[i][expressed]);
-        domainArray.push(val);
-    };
+        //build array of all values of the expressed attribute for a quantile scale
+        var domainArray = [];
+        for (var i=0; i<data.length; i++){
+            var val = parseFloat(data[i][expressed]);
+            domainArray.push(val);
+        };
 
-    //assign array of expressed values as scale domain
-    colorScale.domain(domainArray);
-        
-//        //create natural breaks color scale generator
-//        var colorScale = d3.scale.threshold()
-//            .range(colorClasses);
-//        
-//        //build array of all values of the expressed attribute
-//        var domainArray = []
-//        for (var i = 0; i<data.length; i++){
-//            var val = parseFloat(data[i][expressed]);
-//            domainArray.push(val);
-//        };
-//        
-//        //cluster data using simple statistics clustering algorithm
-//        var clusters = ss.ckmeans(domainArray, 5);
-//        
-//        console.log(clusters); 
-//        
-//        //reset domain array to cluster minima
-//        domainArray = clusters.map(function(d){
-//            return d3.min(d);
-//        });
-//        
-//        //remove first value from domain array to create class breakpoints
-//        domainArray.shift();
-//        
-//        //assign array of last 7 cluster minimums as domain
-//        colorScale.domain(domainArray);
-        
+        //assign array of expressed values as scale domain
+        colorScale.domain(domainArray);
+
         return colorScale;
-        
+
     };
     
+    //function to test for data value and return grey color if no data
+    function testDataValue(props, colorScale){
+        //make sure attribute value is a number
+        var val = parseFloat(props[expressed]);
+        //if attribute value exists, assign a color; otherwise assign gray
+        if (val && val !=NaN){
+            return colorScale(val);
+        } else {
+            return "CCC";
+        };
+    };
+    
+    //function to create coordinated bar chart
+    function setChart(csvData, colorScale){
+        //chart frame dimensions
+        var chartWidth = window.innerWidth*0.425,
+            chartHeight = 700;
+        
+        //create a second SVG element to hold the bar chart
+        var chart = d3.select("body")
+            .append("svg")
+            .attr("width", chartWidth)
+            .attr("height", chartHeight)
+            .attr("class", "chart");
+    };
     
     //function to create graticule
     function setGraticule(map, path){
@@ -190,7 +180,7 @@
             })
             .attr("d", path)
             .style("fill", function(d){
-                return colorScale(d.properties[expressed]);
+                return testDataValue(d.properties, colorScale);
             });
     };     
 
