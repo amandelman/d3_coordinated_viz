@@ -118,6 +118,79 @@
             .attr("width", chartWidth)
             .attr("height", chartHeight)
             .attr("class", "chart");
+        
+        //create a scale to size bars appropriately to frame
+        var yScale = d3.scale.linear()
+            .range([0, chartHeight])
+            .domain([0, 75]);
+        
+        //set bars for each Louisiana parish
+        var bars = chart.selectAll("bars")
+            .data(csvData)
+            .enter()
+            .append("rect")
+            .sort(function(a,b){
+                return b[expressed]-a[expressed]
+            })
+            .attr("class", function(d){
+                return "bars " + d.GEOID;
+            })
+            .attr("width", chartWidth/csvData.length - 0.5)
+            .attr("x", function (d, i){
+                return i*(chartWidth/csvData.length)
+            })
+            .attr("height", function(d){
+                return yScale(parseFloat(d[expressed]));
+            })
+            .attr("y", function(d){
+                return chartHeight - yScale(parseFloat(d[expressed]));
+            })
+            .style("fill", function(d){
+                return testDataValue(d, colorScale)
+            });
+        
+        //annotate bars with attribute value text
+        var numbers = chart.selectAll("numbers")
+            .data(csvData)
+            .enter()
+            .append("text")
+            .sort(function(a,b){
+                return b[expressed]-a[expressed]
+            })
+            .attr("class", function(d){
+                return "numbers " + d.GEOID;
+                console.log(d.GEOID);
+            })
+            .attr("text-anchor", "middle")
+            .attr("x", function(d,i){
+                var fraction = chartWidth/csvData.length;
+                return i * fraction + (fraction-1)/2;
+            })
+            .attr("y", function(d){
+                return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+            })
+            .text(function(d){
+                return d[expressed];
+            });
+        
+        //create text element for chart title
+        var chartTitle = chart.append("text")
+            .attr("x", 20)
+            .attr("y", 40)
+            .attr("class", "chartTitle")
+            .text("Percent African-American by Louisiana Parish, 2010");
+        
+        //create vertical axis generator
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+
+        //place axis
+        var axis = chart.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(50, 0)")
+            .call(yAxis);
+        
     };
     
     //function to create graticule
