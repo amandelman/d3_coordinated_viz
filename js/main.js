@@ -121,7 +121,7 @@
         
         //create a scale to size bars appropriately to frame
         var yScale = d3.scale.linear()
-            .range([0, chartHeight])
+            .range([chartHeight, 0])
             .domain([0, 75]);
         
         //set bars for each Louisiana parish
@@ -140,10 +140,10 @@
                 return i*(chartWidth/csvData.length)
             })
             .attr("height", function(d){
-                return yScale(parseFloat(d[expressed]));
+                return chartHeight - yScale(parseFloat(d[expressed]));
             })
             .attr("y", function(d){
-                return chartHeight - yScale(parseFloat(d[expressed]));
+                return yScale(parseFloat(d[expressed]));
             })
             .style("fill", function(d){
                 return testDataValue(d, colorScale)
@@ -167,7 +167,7 @@
                 return i * fraction + (fraction-1)/2;
             })
             .attr("y", function(d){
-                return chartHeight - yScale(parseFloat(d[expressed])) + 15;
+                return yScale(parseFloat(d[expressed])) + 15;
             })
             .text(function(d){
                 return d[expressed];
