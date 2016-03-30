@@ -39,8 +39,8 @@
         var q = d3_queue.queue()
             q
             .defer(d3.csv, "data/d3_multivariate_data.csv") //load attributes from csv
-            .defer(d3.json, "data/surrounding_states.topojson") //load surrounding states data
-            .defer(d3.json, "data/louisiana_parishes.topojson") //load choropleth spatial data
+            .defer(d3.json, "data/states-merged.topojson") //load surrounding states data
+            .defer(d3.json, "data/louisiana_parishes_fixed.topojson") //load choropleth spatial data
             .await(callback);
         
         //callback function to use data once loaded
@@ -49,8 +49,8 @@
             setGraticule(map, path);
             
             //translate louisiana and background topoJSONs
-            var backgroundStates = topojson.feature(background, background.objects.surrounding_states)
-                louisianaParishes = topojson.feature(louisiana, louisiana.objects.cb_2014_us_county_500k).features
+            var backgroundStates = topojson.feature(background, background.objects.merged)
+                louisianaParishes = topojson.feature(louisiana, louisiana.objects.louisiana_parishes_fixed).features
             
              //add background states to the map
             var states = map.append("path")
@@ -74,7 +74,7 @@
     
     //function to create color scale generator
     function makeColorScale(data){
-        var colorClasses = ['#f7f4f9','#e7e1ef','#d4b9da','#c994c7','#df65b0','#e7298a','#ce1256','#980043','#67001f'];
+        var colorClasses = ['#e2dee9','#d4b9da','#c994c7','#df65b0','#e7298a','#ce1256','#91003f'];
     
         //create color scale generator
         var colorScale = d3.scale.quantile()
@@ -102,7 +102,7 @@
         if (val && val !=NaN){
             return colorScale(val);
         } else {
-            return "CCC";
+            return "#b1b1b1";
         };
     };
     
@@ -110,18 +110,32 @@
     function setChart(csvData, colorScale){
         //chart frame dimensions
         var chartWidth = window.innerWidth*0.425,
-            chartHeight = 700;
+            chartHeight = 706,
+            leftPadding = 25,
+            rightPadding = 2,
+            topBottomPadding = 5,
+            chartInnerWidth = chartWidth - leftPadding - rightPadding,
+            chartInnerHeight = chartHeight - topBottomPadding * 2,
+            translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+        
         
         //create a second SVG element to hold the bar chart
         var chart = d3.select("body")
             .append("svg")
             .attr("width", chartWidth)
-            .attr("height", chartHeight)
+            .attr("height", chartHeight + 10)
             .attr("class", "chart");
+        
+        //create a rectangle for chart background fill
+        var chartBackground = chart.append("rect")
+            .attr("class", "chartBackground")
+            .attr("width", chartInnerWidth)
+            .attr("height", chartInnerHeight)
+            .attr("transform", translate);
         
         //create a scale to size bars appropriately to frame
         var yScale = d3.scale.linear()
-            .range([chartHeight, 0])
+            .range([chartHeight-10, 0])
             .domain([0, 75]);
         
         //set bars for each Louisiana parish
@@ -133,52 +147,52 @@
                 return b[expressed]-a[expressed]
             })
             .attr("class", function(d){
-                return "bars " + d.GEOID;
+                return "bar " + d.GEOID;
             })
-            .attr("width", chartWidth/csvData.length - 0.5)
+            .attr("width", chartInnerWidth/csvData.length - 0.5)
             .attr("x", function (d, i){
-                return i*(chartWidth/csvData.length)
+                return i*(chartInnerWidth/csvData.length) + leftPadding;
             })
             .attr("height", function(d){
                 return chartHeight - yScale(parseFloat(d[expressed]));
             })
             .attr("y", function(d){
-                return yScale(parseFloat(d[expressed]));
+                return yScale(parseFloat(d[expressed])) - topBottomPadding;
             })
             .style("fill", function(d){
                 return testDataValue(d, colorScale)
             });
         
-        //annotate bars with attribute value text
-        var numbers = chart.selectAll("numbers")
-            .data(csvData)
-            .enter()
-            .append("text")
-            .sort(function(a,b){
-                return b[expressed]-a[expressed]
-            })
-            .attr("class", function(d){
-                return "numbers " + d.GEOID;
-                console.log(d.GEOID);
-            })
-            .attr("text-anchor", "middle")
-            .attr("x", function(d,i){
-                var fraction = chartWidth/csvData.length;
-                return i * fraction + (fraction-1)/2;
-            })
-            .attr("y", function(d){
-                return yScale(parseFloat(d[expressed])) + 15;
-            })
-            .text(function(d){
-                return d[expressed];
-            });
+//        //annotate bars with attribute value text
+//        var numbers = chart.selectAll("numbers")
+//            .data(csvData)
+//            .enter()
+//            .append("text")
+//            .sort(function(a,b){
+//                return b[expressed]-a[expressed]
+//            })
+//            .attr("class", function(d){
+//                return "numbers " + d.GEOID;
+//                console.log(d.GEOID);
+//            })
+//            .attr("text-anchor", "middle")
+//            .attr("x", function(d,i){
+//                var fraction = chartWidth/csvData.length;
+//                return i * fraction + (fraction-1)/2;
+//            })
+//            .attr("y", function(d){
+//                return yScale(parseFloat(d[expressed])) + 15;
+//            })
+//            .text(function(d){
+//                return d[expressed];
+//            });
         
         //create text element for chart title
         var chartTitle = chart.append("text")
-            .attr("x", 20)
+            .attr("x", 40)
             .attr("y", 40)
             .attr("class", "chartTitle")
-            .text("Percent African-American by Louisiana Parish, 2010");
+            .text("Percentage of African-Americans by Louisiana Parish, 2010");
         
         //create vertical axis generator
         var yAxis = d3.svg.axis()
@@ -188,8 +202,15 @@
         //place axis
         var axis = chart.append("g")
             .attr("class", "axis")
-            .attr("transform", "translate(50, 0)")
+            .attr("transform", translate)
             .call(yAxis);
+        
+        //create frame for chart border
+        var chartFrame = chart.append("rect")
+            .attr("class", "chartFrame")
+            .attr("width", chartInnerWidth)
+            .attr("height", chartInnerHeight)
+            .attr("transform", translate);
         
     };
     
