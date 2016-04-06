@@ -4,11 +4,27 @@
 (function(){
     
     //pseudo global variables
-    var attCsvArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013"]; //list of attributes to be expressed
+    var attCsvArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013", "releases_2014"]; //list of attributes to be expressed
     
-    var displayArray = ["African-American Population", "Median Income", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted"]
+    var displayArray = ["African-American Population", "Median Income", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted", "Number of Releases"]
     
     var expressed = attCsvArray[0]; //initial attribute
+    
+    //chart frame dimensions
+    var chartWidth = window.innerWidth*0.425,
+        chartHeight = 706,
+        leftPadding = 25,
+        rightPadding = 2,
+        topBottomPadding = 5,
+        chartInnerWidth = chartWidth - leftPadding - rightPadding,
+        chartInnerHeight = chartHeight - topBottomPadding * 2,
+        translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+    
+    //create a scale to size bars appropriately to frame and for axis
+    var yScale = d3.scale.linear()
+        .range([chartHeight-10, 0])
+        .domain([0, 75]);
+
 
     //execute script when window is loaded
     window.onload = setMap();
@@ -106,6 +122,7 @@
         var val = parseFloat(props[expressed]);
         //if attribute value exists, assign a color; otherwise assign gray
         if (val && val !=NaN){
+            console.log(val);
             return colorScale(val);
         } else {
             return "#b1b1b1";
@@ -114,15 +131,15 @@
     
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
-        //chart frame dimensions
-        var chartWidth = window.innerWidth*0.425,
-            chartHeight = 706,
-            leftPadding = 25,
-            rightPadding = 2,
-            topBottomPadding = 5,
-            chartInnerWidth = chartWidth - leftPadding - rightPadding,
-            chartInnerHeight = chartHeight - topBottomPadding * 2,
-            translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
+//        //chart frame dimensions
+//        var chartWidth = window.innerWidth*0.425,
+//            chartHeight = 706,
+//            leftPadding = 25,
+//            rightPadding = 2,
+//            topBottomPadding = 5,
+//            chartInnerWidth = chartWidth - leftPadding - rightPadding,
+//            chartInnerHeight = chartHeight - topBottomPadding * 2,
+//            translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
         
         
         //create a second SVG element to hold the bar chart
@@ -139,10 +156,10 @@
             .attr("height", chartInnerHeight)
             .attr("transform", translate);
         
-        //create a scale to size bars appropriately to frame
-        var yScale = d3.scale.linear()
-            .range([chartHeight-10, 0])
-            .domain([0, 75]);
+//        //create a scale to size bars appropriately to frame and for axis
+//        var yScale = d3.scale.linear()
+//            .range([chartHeight-10, 0])
+//            .domain([0, 75]);
         
         //set bars for each Louisiana parish
         var bars = chart.selectAll("bars")
