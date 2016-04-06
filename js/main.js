@@ -4,8 +4,11 @@
 (function(){
     
     //pseudo global variables
-    var attArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013"]; //list of attributes to be expressed
-    var expressed = attArray[0]; //initial attribute
+    var attCsvArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013"]; //list of attributes to be expressed
+    
+    var displayArray = ["African-American Population", "Median Income", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted"]
+    
+    var expressed = attCsvArray[0]; //initial attribute
 
     //execute script when window is loaded
     window.onload = setMap();
@@ -69,6 +72,9 @@
             
             //add coordinated visualization to the map
             setChart(csvData, colorScale);
+            
+            createDropdown(csvData);
+        
         };
     }; //end of setMap()
     
@@ -251,7 +257,7 @@
                 if (geoKey == csvKey){
 
                     //assign all attributes and values
-                    attArray.forEach(function(attr){
+                    attCsvArray.forEach(function(attr){
                         var val = parseFloat(csvParish[attr]); //get CSV attribute value
                         geoProps[attr] = val; //assign attribute and value to geoJSON properties
                     });
@@ -265,7 +271,7 @@
     //function to draw enumeration units
     function setEnumerationUnits(louisianaParishes, map, path,  colorScale){
         //add Louisiana parishes to the map
-        var parishes = map.selectAll(".regions")
+        var parishes = map.selectAll(".parishes")
             .data(louisianaParishes)
             .enter()
             .append("path")
@@ -277,5 +283,73 @@
                 return testDataValue(d.properties, colorScale);
             });
     };     
+
+    function createDropdown(csvData){
+        //add select element
+        var dropdown = d3.select("body")
+            .append("select")
+            .attr("class", "dropdown")
+            .on("change", function(){
+                changeAttribute(this.value, csvData)
+            })
+        
+        //add initial option
+        var initialOption = dropdown.append("option")
+            .attr("class", "initialOption")
+            .attr("disabled", "true")
+            .text("Select Attribute");
+        
+        var attrOptions = dropdown.selectAll("attrOptions")
+            .data(attCsvArray)
+            .enter()
+            .append("option")
+            .attr("value", function(d){return d})
+//            .text(function(d){return d});    
+            .text(function(d, i){return displayArray[i]});    
+    };
+    
+    //dropdown change listener handler
+    function changeAttribute(attribute, csvData){
+        //change the expressed attribute
+        expressed = attribute;
+        
+        //recreate the color scale
+        var colorScale = makeColorScale(csvData);
+        
+        //recolor enumeration units
+        var parishes = d3.selectAll(".parishes")
+            .style("fill", function(d){
+                return testDataValue(d.properties, colorScale);
+            });
+        
+        //re-sort, resize, and recolor bars
+        var bars = d3.selectAll(".bar")
+            //re-sort bars
+            .sort(function(a,b){
+                return b[expressed]-a[expressed]
+            })
+            .attr("class", function(d){
+                return "bar " + d.GEOID;
+            })
+            .attr("width", chartInnerWidth/csvData.length - 0.5)
+            .attr("x", function (d, i){
+                return i*(chartInnerWidth/csvData.length) + leftPadding;
+            })
+            .attr("height", function(d){
+                return chartHeight - yScale(parseFloat(d[expressed]));
+            })
+            .attr("y", function(d){
+                return yScale(parseFloat(d[expressed])) - topBottomPadding;
+            })
+            .style("fill", function(d){
+                return testDataValue(d, colorScale)
+            });
+        
+    };
+    
+    // ON USER SELECTION:
+// 4. Re-sort each bar on the bar chart
+// 5. Resize each bar on the bar chart
+// 6. Recolor each bar on the bar chart
 
 })();
