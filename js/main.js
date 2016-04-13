@@ -87,7 +87,7 @@
             setEnumerationUnits(louisianaParishes, map, path, colorScale);
             
             //add coordinated visualization to the map
-            setChart(csvData, colorScale);
+            setChart(csvData, colorScale, louisianaParishes);
             
             createDropdown(csvData);
         
@@ -130,7 +130,6 @@
     
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
-        
         //create a second SVG element to hold the bar chart
         var chart = d3.select("body")
             .append("svg")
@@ -457,33 +456,33 @@
         //label content
         
         if (expressed == "medianIncome2011"){
-            var updatedTitle = "Median Income by Parish, 2011"
+            var updatedTitle = "Dollars per Year Median Income (in 2011)"
             
             } else if (expressed == "wasteDensity2011") {
                 
-            var updatedTitle = "Hazardous Waste Facilities per Parish Square Mile, 2011"
+            var updatedTitle = "Hazardous Waste Facilities per Square Mile in 2011"
             
             } else if (expressed == "petrochemDensity2014") {
                 
-            var updatedTitle = "Petrochemical Facilities per Parish Square Mile, 2014"
+            var updatedTitle = "Petrochemical Facilities per Square Mile in 2014"
             
             } else if (expressed == "toxicsPP2010_2013") {
                 
-            var updatedTitle = "Pounds of Toxic Substances Releases per Person, 2010-2013"
+            var updatedTitle = "Pounds of Toxic Substances Released per Person, 2010-2013"
             
             } else if (expressed == "releases_2014") {
                 
-            var updatedTitle = "Number of Toxic Releases by Parish, 2014"
+            var updatedTitle = "Toxic Releases in 2014"
             
             } else if (expressed == "releases_per_facility_2014") {
                 
-            var updatedTitle = "Toxic Releases per Facility by Parish, 2014"
+            var updatedTitle = "Toxic Releases per Facility in 2014"
             } else {
                 
-            var updatedTitle = "Percent African-American Population by Parish, 2010"
+            var updatedTitle = "Percent African-American in 2010"
             }
         
-        var labelAttribute = "<h1>" + props[expressed] + "</h1><b>" + updatedTitle + "</b>";
+        var labelAttribute = "<h1>" + props[expressed] + "</h1><br><h3>" + updatedTitle + "</h3>";
         //create info label div
         var infolabel = d3.select("body")
             .append("div")
@@ -496,7 +495,7 @@
         
         var parishName = infolabel.append("div")
             .attr("class", "labelname")
-            .html(props.NAME);
+            .html("Parish: " + props.NAME);
     };
     
     //function to move info label with mouse
