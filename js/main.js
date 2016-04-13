@@ -4,16 +4,16 @@
 (function(){
     
     //pseudo global variables
-    var attCsvArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013", "releases_2014"]; //list of attributes to be expressed
+    var attCsvArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013", "releases_2014", "releases_per_facility_2014"]; //list of attributes to be expressed
     
-    var displayArray = ["African-American Population", "Median Income", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted", "Number of Releases"]
+    var displayArray = ["African-American Population", "Median Income", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted", "Number of Releases", "Releases Per Facility"]
     
     var expressed = attCsvArray[0]; //initial attribute
     
     //chart frame dimensions
-    var chartWidth = window.innerWidth*0.425,
+    var chartWidth = window.innerWidth*0.445,
         chartHeight = 706,
-        leftPadding = 25,
+        leftPadding = 45,
         rightPadding = 2,
         topBottomPadding = 5,
         chartInnerWidth = chartWidth - leftPadding - rightPadding,
@@ -122,7 +122,6 @@
         var val = parseFloat(props[expressed]);
         //if attribute value exists, assign a color; otherwise assign gray
         if (val && val !=NaN){
-            console.log(val);
             return colorScale(val);
         } else {
             return "#b1b1b1";
@@ -131,16 +130,6 @@
     
     //function to create coordinated bar chart
     function setChart(csvData, colorScale){
-//        //chart frame dimensions
-//        var chartWidth = window.innerWidth*0.425,
-//            chartHeight = 706,
-//            leftPadding = 25,
-//            rightPadding = 2,
-//            topBottomPadding = 5,
-//            chartInnerWidth = chartWidth - leftPadding - rightPadding,
-//            chartInnerHeight = chartHeight - topBottomPadding * 2,
-//            translate = "translate(" + leftPadding + "," + topBottomPadding + ")";
-        
         
         //create a second SVG element to hold the bar chart
         var chart = d3.select("body")
@@ -156,11 +145,6 @@
             .attr("height", chartInnerHeight)
             .attr("transform", translate);
         
-//        //create a scale to size bars appropriately to frame and for axis
-//        var yScale = d3.scale.linear()
-//            .range([chartHeight-10, 0])
-//            .domain([0, 75]);
-        
         //set bars for each Louisiana parish
         var bars = chart.selectAll("bars")
             .data(csvData)
@@ -173,49 +157,12 @@
                 return "bar " + d.GEOID;
             })
             .attr("width", chartInnerWidth/csvData.length - 0.5)
-            .attr("x", function (d, i){
-                return i*(chartInnerWidth/csvData.length) + leftPadding;
-            })
-            .attr("height", function(d){
-                return chartHeight - yScale(parseFloat(d[expressed]));
-            })
-            .attr("y", function(d){
-                return yScale(parseFloat(d[expressed])) - topBottomPadding;
-            })
-            .style("fill", function(d){
-                return testDataValue(d, colorScale)
-            });
-        
-//        //annotate bars with attribute value text
-//        var numbers = chart.selectAll("numbers")
-//            .data(csvData)
-//            .enter()
-//            .append("text")
-//            .sort(function(a,b){
-//                return b[expressed]-a[expressed]
-//            })
-//            .attr("class", function(d){
-//                return "numbers " + d.GEOID;
-//                console.log(d.GEOID);
-//            })
-//            .attr("text-anchor", "middle")
-//            .attr("x", function(d,i){
-//                var fraction = chartWidth/csvData.length;
-//                return i * fraction + (fraction-1)/2;
-//            })
-//            .attr("y", function(d){
-//                return yScale(parseFloat(d[expressed])) + 15;
-//            })
-//            .text(function(d){
-//                return d[expressed];
-//            });
         
         //create text element for chart title
         var chartTitle = chart.append("text")
-            .attr("x", 40)
+            .attr("x", 60)
             .attr("y", 40)
-            .attr("class", "chartTitle")
-            .text("Percentage of African-Americans by Louisiana Parish, 2010");
+            .attr("class", "chartTitle");
         
         //create vertical axis generator
         var yAxis = d3.svg.axis()
@@ -235,7 +182,9 @@
             .attr("height", chartInnerHeight)
             .attr("transform", translate);
         
-    };
+        updateChart(bars, csvData.length, colorScale, yScale);
+        
+    }; //end of setChart
     
     //function to create graticule
     function setGraticule(map, path){
@@ -321,8 +270,7 @@
             .enter()
             .append("option")
             .attr("value", function(d){return d})
-//            .text(function(d){return d});    
-            .text(function(d, i){return displayArray[i]});    
+            .text(function(d, i){return displayArray[i]});        
     };
     
     //dropdown change listener handler
@@ -339,34 +287,113 @@
                 return testDataValue(d.properties, colorScale);
             });
         
+        //rescale chart
+        if (attribute == "medianIncome2011"){
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 75000]);
+            
+        } else if (attribute == "wasteDensity2011") {
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 0.35]);
+            
+        } else if (attribute == "petrochemDensity2014") {
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 0.085]);
+            
+        } else if (attribute == "toxicsPP2010_2013") {
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 425]);
+            
+        } else if (attribute == "releases_2014") {
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 375]);
+        
+        } else if (attribute == "releases_per_facility_2014") {
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 29]);
+            
+        } else {
+            var yScale = d3.scale.linear()
+            .range([chartHeight-10, 0])
+            .domain([0, 75]);
+            
+        };
+        
         //re-sort, resize, and recolor bars
         var bars = d3.selectAll(".bar")
             //re-sort bars
             .sort(function(a,b){
                 return b[expressed]-a[expressed]
+            });
+        
+        updateChart(bars, csvData.length, colorScale, yScale);
+    };
+    
+    function updateChart(bars, n, colorScale, yScale){
+        //position bars
+        bars.attr("x", function (d, i){
+                return i*(chartInnerWidth/n) + leftPadding;
             })
-            .attr("class", function(d){
-                return "bar " + d.GEOID;
-            })
-            .attr("width", chartInnerWidth/csvData.length - 0.5)
-            .attr("x", function (d, i){
-                return i*(chartInnerWidth/csvData.length) + leftPadding;
-            })
-            .attr("height", function(d){
+        //size/resize bars
+            .attr("height", function(d, i){
                 return chartHeight - yScale(parseFloat(d[expressed]));
             })
             .attr("y", function(d){
                 return yScale(parseFloat(d[expressed])) - topBottomPadding;
             })
+        //color/recolor bars
             .style("fill", function(d){
                 return testDataValue(d, colorScale)
             });
         
+        //recreate y axis
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient("left");
+        
+          //place axis
+        var axis = d3.selectAll("g.axis")
+            .call(yAxis);
+        
+        
+        if (expressed == "medianIncome2011"){
+            var updatedTitle = "Median Income by Parish, 2011"
+            
+            } else if (expressed == "wasteDensity2011") {
+                
+            var updatedTitle = "Hazardous Waste Facilities per Parish Square Mile, 2011"
+            
+            } else if (expressed == "petrochemDensity2014") {
+                
+            var updatedTitle = "Petrochemical Facilities per Parish Square Mile, 2014"
+            
+            } else if (expressed == "toxicsPP2010_2013") {
+                
+            var updatedTitle = "Pounds of Toxic Substances Releases per Person, 2010-2013"
+            
+            } else if (expressed == "releases_2014") {
+                
+            var updatedTitle = "Number of Toxic Releases by Parish, 2014"
+            
+            } else if (expressed == "releases_per_facility_2014") {
+                
+            var updatedTitle = "Toxic Releases per Facility by Parish, 2014"
+            } else {
+                
+            var updatedTitle = "Percent African-American Population by Parish, 2010"
+            }
+        
+        var chartTitle = d3.select(".chartTitle")
+            .text(updatedTitle);
+            
+        
     };
-    
-    // ON USER SELECTION:
-// 4. Re-sort each bar on the bar chart
-// 5. Resize each bar on the bar chart
-// 6. Recolor each bar on the bar chart
+     
 
 })();
