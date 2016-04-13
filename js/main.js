@@ -154,9 +154,14 @@
                 return b[expressed]-a[expressed]
             })
             .attr("class", function(d){
-                return "bar " + d.GEOID;
+                return "bar p" + d.GEOID;
             })
             .attr("width", chartInnerWidth/csvData.length - 0.5)
+            .on("mouseover", highlight)
+            .on("mouseout", dehighlight);
+        
+        var desc = bars.append("desc")
+            .text('{"stroke": "none", "stroke-width": "0px"}');
         
         //create text element for chart title
         var chartTitle = chart.append("text")
@@ -240,14 +245,24 @@
         var parishes = map.selectAll(".parishes")
             .data(louisianaParishes)
             .enter()
+        
             .append("path")
             .attr("class", function(d){
-                return "parishes " + d.properties.GEOID;
+                return "parishes p" + d.properties.GEOID;
             })
             .attr("d", path)
             .style("fill", function(d){
                 return testDataValue(d.properties, colorScale);
-            });
+            })
+            .on("mouseover", function(d){
+                highlight(d.properties);
+            })
+            .on("mouseout", function(d){
+                dehighlight(d.properties);
+            })
+        
+        var desc = parishes.append("desc")
+            .text('{"stroke": "rgba(0, 0, 0, 0.7)", "stroke-width": "0.2px", "stroke-linecap": "round"}');
     };     
 
     function createDropdown(csvData){
@@ -283,6 +298,8 @@
         
         //recolor enumeration units
         var parishes = d3.selectAll(".parishes")
+            .transition()
+            .duration(1000)
             .style("fill", function(d){
                 return testDataValue(d.properties, colorScale);
             });
@@ -325,15 +342,20 @@
             
         };
         
-        //re-sort, resize, and recolor bars
+        //re-sort bars
         var bars = d3.selectAll(".bar")
             //re-sort bars
             .sort(function(a,b){
                 return b[expressed]-a[expressed]
-            });
+            })
+            .transition()
+            .delay(function(d,i){
+                return i * 20
+            })
+            .duration(500);
         
         updateChart(bars, csvData.length, colorScale, yScale);
-    };
+    };//end changeAttribute
     
     function updateChart(bars, n, colorScale, yScale){
         //position bars
@@ -391,9 +413,36 @@
         
         var chartTitle = d3.select(".chartTitle")
             .text(updatedTitle);
-            
-        
-    };
+    };//end updateChart
      
-
+    function highlight(props){
+        //change stroke
+        var selected = d3.selectAll(".p" + props.GEOID)
+        .style("stroke", "#000000")
+        .style("stroke-width", "2")
+//        .style("stroke-dasharray", ("10","5"));
+    };
+    
+    function dehighlight(props){
+        var selected = d3.selectAll(".p" + props.GEOID)
+            .style({
+                "stroke": function(){
+                    return getStyle(this, "stroke")
+                },
+                "stroke-width": function(){
+                    return getStyle(this, "stroke-width")
+                }
+            });
+        
+        function getStyle(element, styleName){
+            var styleText = d3.select(element)
+            .select("desc")
+            .text();
+            
+            var styleObject = JSON.parse(styleText);
+            
+            return styleObject[styleName];
+        };
+    };
+    
 })();
