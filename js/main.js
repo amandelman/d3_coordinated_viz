@@ -158,7 +158,8 @@
             })
             .attr("width", chartInnerWidth/csvData.length - 0.5)
             .on("mouseover", highlight)
-            .on("mouseout", dehighlight);
+            .on("mouseout", dehighlight)
+            .on("mousemove", moveLabel);
         
         var desc = bars.append("desc")
             .text('{"stroke": "none", "stroke-width": "0px"}');
@@ -260,6 +261,7 @@
             .on("mouseout", function(d){
                 dehighlight(d.properties);
             })
+            .on("mousemove", moveLabel);
         
         var desc = parishes.append("desc")
             .text('{"stroke": "rgba(0, 0, 0, 0.7)", "stroke-width": "0.2px", "stroke-linecap": "round"}');
@@ -420,7 +422,10 @@
         var selected = d3.selectAll(".p" + props.GEOID)
         .style("stroke", "#000000")
         .style("stroke-width", "2")
+//        .style("fill-opactity", ".8")
 //        .style("stroke-dasharray", ("10","5"));
+        
+        setLabel(props);
     };
     
     function dehighlight(props){
@@ -443,6 +448,81 @@
             
             return styleObject[styleName];
         };
+        
+        d3.select(".infolabel")
+            .remove();
+    };
+    
+    function setLabel(props){
+        //label content
+        
+        if (expressed == "medianIncome2011"){
+            var updatedTitle = "Median Income by Parish, 2011"
+            
+            } else if (expressed == "wasteDensity2011") {
+                
+            var updatedTitle = "Hazardous Waste Facilities per Parish Square Mile, 2011"
+            
+            } else if (expressed == "petrochemDensity2014") {
+                
+            var updatedTitle = "Petrochemical Facilities per Parish Square Mile, 2014"
+            
+            } else if (expressed == "toxicsPP2010_2013") {
+                
+            var updatedTitle = "Pounds of Toxic Substances Releases per Person, 2010-2013"
+            
+            } else if (expressed == "releases_2014") {
+                
+            var updatedTitle = "Number of Toxic Releases by Parish, 2014"
+            
+            } else if (expressed == "releases_per_facility_2014") {
+                
+            var updatedTitle = "Toxic Releases per Facility by Parish, 2014"
+            } else {
+                
+            var updatedTitle = "Percent African-American Population by Parish, 2010"
+            }
+        
+        var labelAttribute = "<h1>" + props[expressed] + "</h1><b>" + updatedTitle + "</b>";
+        //create info label div
+        var infolabel = d3.select("body")
+            .append("div")
+            .attr({
+                "class": "infolabel",
+                "id": props.GEOID + "_label"
+            })
+            .html(labelAttribute);
+        console.log(props.NAME);
+        
+        var parishName = infolabel.append("div")
+            .attr("class", "labelname")
+            .html(props.NAME);
+    };
+    
+    //function to move info label with mouse
+    function moveLabel(){
+        //get width of label
+        var labelWidth = d3.select(".infolabel")
+            .node()
+            .getBoundingClientRect()
+            .width;
+        
+        //use coordinates of mousemove event to set label locations
+        var x1 = d3.event.clientX + 10,
+            y1 = d3.event.clientY - 75,
+            x2 = d3.event.clientX - labelWidth - 10,
+            y2 = d3.event.clientY + 25;
+        
+        //horizontal label coordinate, testing overflow
+        var x = d3.event.clientX > window.innerWidth - labelWidth - 20 ? x2 : x1;
+        //vertical label coordinate, testing overflow
+        var y = d3.event.clientY < 75 ? y2 : y1;
+        
+        d3.select(".infolabel")
+            .style({
+            "left": x + "px",
+            "top": y + "px"
+        });
     };
     
 })();
