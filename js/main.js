@@ -164,10 +164,10 @@
             .text('{"stroke": "none", "stroke-width": "0px"}');
         
         //create text element for chart title
-        var chartTitle = chart.append("text")
-            .attr("x", 60)
-            .attr("y", 40)
-            .attr("class", "chartTitle");
+//        var chartTitle = chart.append("text")
+//            .attr("x", 60)
+//            .attr("y", 40)
+//            .attr("class", "chartTitle");
         
         //create vertical axis generator
         var yAxis = d3.svg.axis()
@@ -414,10 +414,14 @@
         
         var chartTitle = d3.select(".chartTitle")
             .text(updatedTitle);
+        
+          d3.select('.subheader').html(updatedTitle)
+        
     };//end updateChart
      
     function highlight(props){
         //change stroke
+        console.log(props);
         var selected = d3.selectAll(".p" + props.GEOID)
         .style("stroke", "#000000")
         .style("stroke-width", "2")
@@ -481,8 +485,15 @@
                 
             var updatedTitle = "Percent African-American in 2010"
             }
+        var cleanseLabel = function(ex) {
+            if(ex === 0) {
+                return 'no data'
+            } else {
+                return ex
+            }
+        }       
         
-        var labelAttribute = "<h1>" + props[expressed] + "</h1><br><h3>" + updatedTitle + "</h3>";
+        var labelAttribute = "<h1>" + cleanseLabel(props[expressed]) + "</h1><br><h3>" + updatedTitle + "</h3>";
         //create info label div
         var infolabel = d3.select("body")
             .append("div")
