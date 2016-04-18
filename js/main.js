@@ -4,14 +4,14 @@
 (function(){
     
     //pseudo global variables
-    var attCsvArray = ["percentAfAm2010", "medianIncome2011", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013", "releases_2014", "releases_per_facility_2014"]; //list of attributes to be expressed
+    var attCsvArray = ["percentAfAm2010", "percent_poverty_2008", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013", "releases_per_facility_2014"]; //list of attributes to be expressed
     
-    var displayArray = ["African-American Population", "Median Income", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted", "Number of Releases", "Releases Per Facility"]
+    var displayArray = ["African-American Population", "Percent in Poverty", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted", "Toxic Releases per Facility"]
     
     var expressed = attCsvArray[0]; //initial attribute
     
     //chart frame dimensions
-    var chartWidth = window.innerWidth*0.445,
+    var chartWidth = window.innerWidth*0.46,
         chartHeight = 406,
         leftPadding = 45,
         rightPadding = 2,
@@ -33,8 +33,8 @@
     function setMap(){
 
         //map frame dimensions
-        var width = window.innerWidth*0.5,
-            height = 700;
+        var width = window.innerWidth*0.48,
+            height = 670;
 
         //svg container for map
         var map = d3.select("body")
@@ -96,7 +96,7 @@
     
     //function to create color scale generator
     function makeColorScale(data){
-        var colorClasses = ['#e2dee9','#d4b9da','#c994c7','#df65b0','#e7298a','#ce1256','#91003f'];
+        var colorClasses = ['#f1eef6','#d4b9da','#c994c7','#df65b0','#dd1c77','#980043'];
     
         //create color scale generator
         var colorScale = d3.scale.quantile()
@@ -306,10 +306,10 @@
             });
         
         //rescale chart
-        if (attribute == "medianIncome2011"){
+        if (attribute == "percent_poverty_2008"){
             var yScale = d3.scale.linear()
             .range([chartHeight-10, 0])
-            .domain([0, 75000]);
+            .domain([0, 48]);
             
         } else if (attribute == "wasteDensity2011") {
             var yScale = d3.scale.linear()
@@ -326,10 +326,10 @@
             .range([chartHeight-10, 0])
             .domain([0, 425]);
             
-        } else if (attribute == "releases_2014") {
-            var yScale = d3.scale.linear()
-            .range([chartHeight-10, 0])
-            .domain([0, 375]);
+//        } else if (attribute == "releases_2014") {
+//            var yScale = d3.scale.linear()
+//            .range([chartHeight-10, 0])
+//            .domain([0, 375]);
         
         } else if (attribute == "releases_per_facility_2014") {
             var yScale = d3.scale.linear()
@@ -385,8 +385,8 @@
             .call(yAxis);
         
         
-        if (expressed == "medianIncome2011"){
-            var updatedTitle = "Median Income by Parish, 2011"
+        if (expressed == "percent_poverty_2008"){
+            var updatedTitle = "Percent of Population in Poverty, 2008"
             
             } else if (expressed == "wasteDensity2011") {
                 
@@ -400,9 +400,9 @@
                 
             var updatedTitle = "Pounds of Toxic Substances Releases per Person, 2010-2013"
             
-            } else if (expressed == "releases_2014") {
-                
-            var updatedTitle = "Number of Toxic Releases by Parish, 2014"
+//            } else if (expressed == "releases_2014") {
+//                
+//            var updatedTitle = "Number of Toxic Releases by Parish, 2014"
             
             } else if (expressed == "releases_per_facility_2014") {
                 
@@ -421,7 +421,6 @@
      
     function highlight(props){
         //change stroke
-        console.log(props);
         var selected = d3.selectAll(".p" + props.GEOID)
         .style("stroke", "#000000")
         .style("stroke-width", "2")
@@ -459,8 +458,8 @@
     function setLabel(props){
         //label content
         
-        if (expressed == "medianIncome2011"){
-            var updatedTitle = "Dollars per Year Median Income (in 2011)"
+        if (expressed == "percent_poverty_2008"){
+            var updatedTitle = "Percent in Poverty, 2008"
             
             } else if (expressed == "wasteDensity2011") {
                 
@@ -474,9 +473,9 @@
                 
             var updatedTitle = "Pounds of Toxic Substances Released per Person, 2010-2013"
             
-            } else if (expressed == "releases_2014") {
-                
-            var updatedTitle = "Toxic Releases in 2014"
+//            } else if (expressed == "releases_2014") {
+//                
+//            var updatedTitle = "Toxic Releases in 2014"
             
             } else if (expressed == "releases_per_facility_2014") {
                 
@@ -485,15 +484,19 @@
                 
             var updatedTitle = "Percent African-American in 2010"
             }
+        
+        //Make 0 values display as "No Data" to avoid NaNs
         var cleanseLabel = function(ex) {
             if(ex === 0) {
-                return 'no data'
+                return "No Data"
+//            } else if (ex === 0.000000001) {
+//                return "0"  
             } else {
                 return ex
             }
         }       
         
-        var labelAttribute = "<h1>" + cleanseLabel(props[expressed]) + "</h1><br><h3>" + updatedTitle + "</h3>";
+        var labelAttribute = "<h2>" + cleanseLabel(props[expressed]) + "</h2><br><h3>" + updatedTitle + "</h3>";
         //create info label div
         var infolabel = d3.select("body")
             .append("div")
@@ -502,7 +505,8 @@
                 "id": props.GEOID + "_label"
             })
             .html(labelAttribute);
-        console.log(props.NAME);
+        
+        console.log(props[expressed]);
         
         var parishName = infolabel.append("div")
             .attr("class", "labelname")
