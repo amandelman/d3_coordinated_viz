@@ -4,9 +4,9 @@
 (function(){
     
     //pseudo global variables
-    var attCsvArray = ["percentAfAm2010", "percent_poverty_2008", "wasteDensity2011", "petrochemDensity2014", "toxicsPP2010_2013", "releases_per_facility_2014"]; //list of attributes to be expressed
+    var attCsvArray = ["petrochemDensity2014", "toxicsPP2010_2013", "releases_per_facility_2014", "wasteDensity2011",  "percentAfAm2010", "percent_poverty_2008"]; //list of attributes to be expressed
     
-    var displayArray = ["African-American Population", "Percent in Poverty", "Waste Facilities", "Petrochemical Facilities", "Toxic Materials Emitted", "Toxic Releases per Facility"]
+    var displayArray = ["Petrochemical Facilities", "Toxic Materials Emitted", "Toxic Releases per Facility", "Hazardous Waste Facilities", "African-American Population", "Percent in Poverty"]
     
     var expressed = attCsvArray[0]; //initial attribute
     
