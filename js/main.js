@@ -13,7 +13,7 @@
     //chart frame dimensions
     var chartWidth = window.innerWidth*0.46,
         chartHeight = 406,
-        leftPadding = 45,
+        leftPadding = 35,
         rightPadding = 2,
         topBottomPadding = 5,
         chartInnerWidth = chartWidth - leftPadding - rightPadding,
@@ -23,7 +23,7 @@
     //create a scale to size bars appropriately to frame and for axis
     var yScale = d3.scale.linear()
         .range([chartHeight-10, 0])
-        .domain([0, 75]);
+        .domain([0, 0.085]);
 
 
     //execute script when window is loaded
@@ -48,7 +48,7 @@
             .center([0, 31])
             .rotate([91.5, 0 , 0])
             .parallels([28, 34])
-            .scale(8400)
+            .scale(width*12.5)
             .translate([width/2, height/2]);
 
         var path = d3.geo.path()
@@ -96,7 +96,7 @@
     
     //function to create color scale generator
     function makeColorScale(data){
-        var colorClasses = ['#f1eef6','#d4b9da','#c994c7','#df65b0','#dd1c77','#980043'];
+        var colorClasses =      ['#f1eef6','#d4b9da','#c994c7','#df65b0','#dd1c77','#980043'];
     
         //create color scale generator
         var colorScale = d3.scale.quantile()
@@ -124,7 +124,7 @@
         if (val && val !=NaN){
             return colorScale(val);
         } else {
-            return "#b1b1b1";
+            return "#d3d3d3";
         };
     };
     
@@ -155,19 +155,12 @@
             .attr("class", function(d){
                 return "bar p" + d.GEOID;
             })
-            .attr("width", chartInnerWidth/csvData.length - 0.5)
             .on("mouseover", highlight)
             .on("mouseout", dehighlight)
             .on("mousemove", moveLabel);
         
         var desc = bars.append("desc")
             .text('{"stroke": "none", "stroke-width": "0px"}');
-        
-        //create text element for chart title
-//        var chartTitle = chart.append("text")
-//            .attr("x", 60)
-//            .attr("y", 40)
-//            .attr("class", "chartTitle");
         
         //create vertical axis generator
         var yAxis = d3.svg.axis()
@@ -281,6 +274,7 @@
             .attr("disabled", "true")
             .text("Select Attribute");
         
+        //dropdown options
         var attrOptions = dropdown.selectAll("attrOptions")
             .data(attCsvArray)
             .enter()
@@ -324,12 +318,7 @@
         } else if (attribute == "toxicsPP2010_2013") {
             var yScale = d3.scale.linear()
             .range([chartHeight-10, 0])
-            .domain([0, 425]);
-            
-//        } else if (attribute == "releases_2014") {
-//            var yScale = d3.scale.linear()
-//            .range([chartHeight-10, 0])
-//            .domain([0, 375]);
+            .domain([0, 435]);
         
         } else if (attribute == "releases_per_facility_2014") {
             var yScale = d3.scale.linear()
@@ -356,35 +345,60 @@
             .duration(500);
         
         updateChart(bars, csvData.length, colorScale, yScale);
+   
     };//end changeAttribute
     
     function updateChart(bars, n, colorScale, yScale){
+        //count number of zeroes and set a variable equal to that total
+        var currentAttTotal = 0;
+        
+        bars.each(function(d,i) {
+            if(d[expressed] != 0) {
+                currentAttTotal++;
+            }
+        });
+
+        n = currentAttTotal;
+        
         //position bars
         bars.attr("x", function (d, i){
+            console.log(d[expressed])
                 return i*(chartInnerWidth/n) + leftPadding;
             })
         //size/resize bars
             .attr("height", function(d, i){
-                return chartHeight - yScale(parseFloat(d[expressed]));
-            })
+                return chartHeight - yScale(parseFloat(d[expressed]))
+            })  
             .attr("y", function(d){
                 return yScale(parseFloat(d[expressed])) - topBottomPadding;
             })
-        //color/recolor bars
+             
+        //color/recolor bars, remove bars with a value of 0, re-set bar width to account for removed bars
             .style("fill", function(d){
                 return testDataValue(d, colorScale)
+            })
+            .attr("width", function (d, i){
+                if (d[expressed] == 0){
+                    return 0;
+                    } else {return chartInnerWidth/n - 0.5;}
+                })    
+            .style('display', function(d){
+                if(d[expressed] == 0) {
+                    return 'none'
+                }
             });
+        
         
         //recreate y axis
         var yAxis = d3.svg.axis()
             .scale(yScale)
             .orient("left");
         
-          //place axis
+        //place axis
         var axis = d3.selectAll("g.axis")
             .call(yAxis);
         
-        
+        //update title to reflect variable selected from dropdown
         if (expressed == "percent_poverty_2008"){
             var updatedTitle = "Percent of Population in Poverty, 2008"
             
@@ -399,10 +413,6 @@
             } else if (expressed == "toxicsPP2010_2013") {
                 
             var updatedTitle = "Pounds of Toxic Substances Releases per Person, 2010-2013"
-            
-//            } else if (expressed == "releases_2014") {
-//                
-//            var updatedTitle = "Number of Toxic Releases by Parish, 2014"
             
             } else if (expressed == "releases_per_facility_2014") {
                 
@@ -419,17 +429,17 @@
         
     };//end updateChart
      
+    //highlight
     function highlight(props){
         //change stroke
         var selected = d3.selectAll(".p" + props.GEOID)
         .style("stroke", "#000000")
         .style("stroke-width", "2")
-//        .style("fill-opactity", ".8")
-//        .style("stroke-dasharray", ("10","5"));
         
         setLabel(props);
     };
     
+    //dehighlight
     function dehighlight(props){
         var selected = d3.selectAll(".p" + props.GEOID)
             .style({
@@ -455,9 +465,11 @@
             .remove();
     };
     
+    //set dynamic label
     function setLabel(props){
         //label content
         
+        //Update title on label depending on selected variable
         if (expressed == "percent_poverty_2008"){
             var updatedTitle = "Percent in Poverty, 2008"
             
@@ -473,10 +485,6 @@
                 
             var updatedTitle = "Pounds of Toxic Substances Released per Person, 2010-2013"
             
-//            } else if (expressed == "releases_2014") {
-//                
-//            var updatedTitle = "Toxic Releases in 2014"
-            
             } else if (expressed == "releases_per_facility_2014") {
                 
             var updatedTitle = "Toxic Releases per Facility in 2014"
@@ -489,13 +497,12 @@
         var cleanseLabel = function(ex) {
             if(ex === 0) {
                 return "No Data"
-//            } else if (ex === 0.000000001) {
-//                return "0"  
             } else {
                 return ex
             }
         }       
         
+        //create label text
         var labelAttribute = "<h2>" + cleanseLabel(props[expressed]) + "</h2><br><h3>" + updatedTitle + "</h3>";
         //create info label div
         var infolabel = d3.select("body")
@@ -505,9 +512,7 @@
                 "id": props.GEOID + "_label"
             })
             .html(labelAttribute);
-        
-        console.log(props[expressed]);
-        
+                
         var parishName = infolabel.append("div")
             .attr("class", "labelname")
             .html("Parish: " + props.NAME);

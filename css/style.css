@@ -2,7 +2,6 @@
 /* 575 boilerplate style.css */
 
 
-
 body {
     margin: 0;
     padding: 0;
@@ -41,7 +40,6 @@ h2.subheader {
     fill: rgb(255, 240, 240);
     stroke: rgba(106, 106, 106, 0.76);
     stroke-width: 1.5px;
-/*    color: rgba(255, 215, 80, 0.81);*/
 }
 
 .map {
@@ -50,22 +48,16 @@ h2.subheader {
 }
 
 .chart {
-/*    border: medium solid #999;*/
     float: right;
     margin: 7px 20px 0 0;
 }
 
 .chartBackground {
     fill: rgb(255, 255, 255);
-/*    fill: blue;*/
 }
 
 .chartFrame {
     fill: none;
-/*
-    stroke: #999;
-    stroke-width: 3px;
-*/
     shape-rendering: crispEdges;
 }
 
@@ -91,12 +83,12 @@ h2.subheader {
 
 .gratLines {
     fill: none;
-    stroke: rgb(118, 189, 240);
+    stroke: rgb(140, 198, 240);
     stroke-width: 1px;
 }
 
 .gratBackground {
-    fill: rgb(90, 178, 240);
+    fill: rgb(112, 187, 240);
 }
 
 
@@ -113,11 +105,9 @@ h2.subheader {
     z-index: 10;
     font-family: Lato, sans-serif;
     font-size: 1.2em;
-/*    font-weight: bold;*/
     padding: 2px;
     border: 1px solid #999;
     background-color: rgb(255, 255, 255);
-/*    box-shadow: 2px 2px 4px #999;*/
 }
 
 option {
